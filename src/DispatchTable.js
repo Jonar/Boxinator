@@ -1,7 +1,6 @@
-import React, { useState } from 'react';
-import dispatches from './mock'
+import React from 'react';
 
-function DispatchTable(props) {
+function DispatchTable({dispatches}) {
     return (
         <table>
             <thead>
@@ -13,16 +12,19 @@ function DispatchTable(props) {
                 </tr>
             </thead>
             <tbody>
-                {dispatches.map(box => {
-                    return (
-                        <tr>
+                {dispatches.length > 0
+                    ? dispatches.map((box, index) => ( //TODO: don't use index as key
+                        <tr key={index}>
                             <td>{box.receiver}</td>
                             <td>{box.weight}</td>
-                            <td style={{backgroundColor: box.color}}></td>
+                            <td style={{ backgroundColor: box.color }}></td>
                             <td>{box.shippingCost}</td>
                         </tr>
-                    );  
-                })}
+                    )) : (
+                        <tr>
+                            <td colSpan={4}>No dispatches</td>
+                        </tr>
+                    )}
             </tbody>
         </table>
     );
