@@ -13,22 +13,50 @@ public class BoxinatorServer {
         Gson gson = new Gson();
         List<Box> boxes = new ArrayList<>();
 
+        enableCORS("http://localhost:3000", "GET, POST", "Accept, Content-Type");
+
         post("/box", "application/json", (request, response) -> {
             Box box = gson.fromJson(request.body(), Box.class);
             //TODO: validate box input
             boxes.add(box);
-            response.type("application/json");
+            //TODO: write box to DB
             return box;
         }, gson::toJson);
 
         get("/dispatches", "application/json", (request, response) -> {
-            response.type("application/json");
             //TODO: read boxes from DB
             List<Dispatch> dispatches = boxes.stream()
                     .map(Dispatch::fromBox)
                     .collect(Collectors.toList());
             return dispatches;
         }, gson::toJson);
+    }
+
+    /** Enables CORS on requests. This method is an initialization method and should be called once. */
+    private static void enableCORS(final String origin, final String methods, final String headers) {
+
+        options("/*", (request, response) -> {
+
+            String accessControlRequestHeaders = request.headers("Access-Control-Request-Headers");
+            if (accessControlRequestHeaders != null) {
+                response.header("Access-Control-Allow-Headers", accessControlRequestHeaders);
+            }
+
+            String accessControlRequestMethod = request.headers("Access-Control-Request-Method");
+            if (accessControlRequestMethod != null) {
+                response.header("Access-Control-Allow-Methods", accessControlRequestMethod);
+            }
+
+            return "OK";
+        });
+
+        before((request, response) -> {
+            response.header("Access-Control-Allow-Origin", origin);
+            response.header("Access-Control-Request-Method", methods);
+            response.header("Access-Control-Allow-Headers", headers);
+
+            response.type("application/json");
+        });
     }
 }
 
