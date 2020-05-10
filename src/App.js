@@ -1,36 +1,30 @@
-import React, {useState} from 'react';
+import React from 'react';
+
 import './App.css';
 import AddBox from './AddBox';
 import DispatchTable from './DispatchTable';
-import mockDispatches from './mock'
 
 function App() {
-  const [dispatches, setDispatches] = useState(mockDispatches);
-  function addDispatch(box) {
-    let shippingCost;
-    switch (box.country) {
-      case 'Sweden':
-        shippingCost = 1.3 * box.weight;
-        break;
-      case 'China':
-        shippingCost = 4 * box.weight;
-        break;
-      case 'Brazil':
-        shippingCost = 8.6 * box.weight;
-        break;
-      case 'Australia':
-        shippingCost = 7.2 * box.weight;
-        break;
+  async function addDispatch(box) {
+    try {
+      const response = await fetch('http://localhost:4567/box', {
+        method: 'POST',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(box),
+      });
+      const data = await response.json();
+      console.log('POST /box response:', data);
+    } catch (error) {
+      console.log(error);
     }
-    const dispatch = {
-      ...box, shippingCost: shippingCost //TODO: remove country prop
-    };
-    setDispatches([...dispatches, dispatch]);
   }
   return (
     <div className="App">
       <AddBox addDispatch={addDispatch}/>
-      <DispatchTable dispatches={dispatches} />
+      <DispatchTable />
     </div>
   );
 }
