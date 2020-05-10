@@ -4,6 +4,8 @@ import static spark.Spark.*;
 
 import com.google.gson.Gson;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -62,11 +64,11 @@ public class BoxinatorServer {
 
 class Box { //DAO
     String receiver;
-    int weight;
+    double weight;
     String color; //TODO: Color class
     String country;
 
-    Box(String receiver, int weight, String color, String country) {
+    Box(String receiver, double weight, String color, String country) {
         this.receiver = receiver;
         this.weight = weight;
         this.color = color;
@@ -76,11 +78,15 @@ class Box { //DAO
 
 class Dispatch { //DTO
     String receiver;
-    int weight;
+    double weight;
     String color; //TODO: Color class
-    double shippingCost;
+    BigDecimal shippingCost;
 
-    Dispatch(String receiver, int weight, String color, double shippingCost) {
+    Dispatch(String receiver, double weight, String color, double shippingCost) {
+        this(receiver, weight, color, BigDecimal.valueOf(shippingCost));
+    }
+
+    Dispatch(String receiver, double weight, String color, BigDecimal shippingCost) {
         this.receiver = receiver;
         this.weight = weight;
         this.color = color;
@@ -88,28 +94,38 @@ class Dispatch { //DTO
     }
 
     public static Dispatch fromBox(Box box) {
-        double shippingCost = calculateShipping(box.weight, box.country);
+        final BigDecimal weight = BigDecimal.valueOf(box.weight);
+        final BigDecimal shippingCost = calculateShipping(weight, box.country);
         return new Dispatch(box.receiver, box.weight, box.color, shippingCost);
     }
 
-    private static double calculateShipping(int weight, String country) {
-        double shippingCost;
+    private static BigDecimal calculateShipping(BigDecimal weight, String country) {
+        final BigDecimal PRICE_SWEDEN = new BigDecimal("1.3");
+        final BigDecimal PRICE_CHINA = new BigDecimal("4");
+        final BigDecimal PRICE_BRAZIL = new BigDecimal("8.6");
+        final BigDecimal PRICE_AUSTRALIA = new BigDecimal("7.2");
+        BigDecimal price;
+
         switch (country) {
             case "Sweden":
-                shippingCost = 1.3 * weight;
+                price = PRICE_SWEDEN;
                 break;
             case "China":
-                shippingCost = 4 * weight;
+                price = PRICE_CHINA;
                 break;
             case "Brazil":
-                shippingCost = 8.6 * weight;
+                price = PRICE_BRAZIL;
                 break;
             case "Australia":
-                shippingCost = 7.2 * weight;
+                price = PRICE_AUSTRALIA;
                 break;
             default:
                 throw new IllegalArgumentException("Unknown country");
         }
+        BigDecimal shippingCost = price.multiply(weight)
+                .setScale(2, RoundingMode.HALF_UP) //two decimals
+                .max(BigDecimal.valueOf(0.01)); //don't round to zero; minimum price is 0.01
+
         return shippingCost;
     }
 }
