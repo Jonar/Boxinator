@@ -13,25 +13,19 @@ import java.util.stream.Collectors;
 public class BoxinatorServer {
     public static void main(String[] args) {
         Gson gson = new Gson();
-        List<Box> boxes = new ArrayList<>();
+        Model model = new InMemoryModel();
 
         enableCORS("http://localhost:3000", "GET, POST", "Accept, Content-Type");
 
         post("/box", "application/json", (request, response) -> {
             Box box = gson.fromJson(request.body(), Box.class);
             //TODO: validate box input
-            boxes.add(box);
-            //TODO: write box to DB
+            model.addBox(box);
             return box;
         }, gson::toJson);
 
-        get("/dispatches", "application/json", (request, response) -> {
-            //TODO: read boxes from DB
-            List<Dispatch> dispatches = boxes.stream()
-                    .map(Dispatch::fromBox)
-                    .collect(Collectors.toList());
-            return dispatches;
-        }, gson::toJson);
+        get("/dispatches", "application/json",
+                (request, response) -> model.getAllBoxesAsDispatches(), gson::toJson);
     }
 
     /** Enables CORS on requests. This method is an initialization method and should be called once. */
@@ -79,7 +73,7 @@ class Box { //DAO
 class Dispatch { //DTO
     String receiver;
     double weight;
-    String color; //TODO: Color class
+    String color; //TODO: Color class. Use Color.decode("#FFCCEE") from Java AWT;
     BigDecimal shippingCost;
 
     Dispatch(String receiver, double weight, String color, double shippingCost) {
@@ -127,5 +121,32 @@ class Dispatch { //DTO
                 .max(BigDecimal.valueOf(0.01)); //don't round to zero; minimum price is 0.01
 
         return shippingCost;
+    }
+}
+
+interface Model {
+    Box addBox(Box box);
+    List<Box> getAllBoxes();
+
+    default List<Dispatch> getAllBoxesAsDispatches() {
+        return getAllBoxes().stream()
+                .map(Dispatch::fromBox)
+                .collect(Collectors.toList());
+    }
+}
+
+class InMemoryModel implements Model {
+
+    private List<Box> boxes = new ArrayList<>();
+
+    @Override
+    public Box addBox(Box box) {
+        boxes.add(box);
+        return box;
+    }
+
+    @Override
+    public List<Box> getAllBoxes() {
+        return boxes;
     }
 }
