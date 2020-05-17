@@ -3,29 +3,42 @@ package se.fortnox.boxinator;
 import static spark.Spark.*;
 
 import com.google.gson.Gson;
+import org.sql2o.Connection;
+import org.sql2o.Sql2o;
+import org.sql2o.converters.UUIDConverter;
+import org.sql2o.quirks.PostgresQuirks;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 public class BoxinatorServer {
     public static void main(String[] args) {
-        Gson gson = new Gson();
-        Model model = new InMemoryModel();
+        Gson convert = new Gson();
+
+        Sql2o sql2o = new Sql2o("jdbc:postgresql://localhost:5432/boxinator",
+                "postgres", "docker", new PostgresQuirks() {
+            {
+                // make sure default UUID converter is used
+                converters.put(UUID.class, new UUIDConverter());
+            }
+        });
+        Model model = new Sql2oPersistenceModel(sql2o);
 
         enableCORS("http://localhost:3000", "GET, POST", "Accept, Content-Type");
 
         post("/box", "application/json", (request, response) -> {
-            Box box = gson.fromJson(request.body(), Box.class);
+            Box box = convert.fromJson(request.body(), Box.class);
             //TODO: validate box input
             model.addBox(box);
             return box;
-        }, gson::toJson);
+        }, convert::toJson);
 
         get("/dispatches", "application/json",
-                (request, response) -> model.getAllBoxesAsDispatches(), gson::toJson);
+                (request, response) -> model.getAllBoxesAsDispatches(), convert::toJson);
     }
 
     /** Enables CORS on requests. This method is an initialization method and should be called once. */
@@ -57,10 +70,11 @@ public class BoxinatorServer {
 }
 
 class Box { //DAO
-    String receiver;
-    double weight;
-    String color; //TODO: Color class
-    String country;
+    public UUID id;
+    public String receiver;
+    public double weight;
+    public String color; //TODO: Color class
+    public String country;
 
     Box(String receiver, double weight, String color, String country) {
         this.receiver = receiver;
@@ -150,3 +164,47 @@ class InMemoryModel implements Model {
         return boxes;
     }
 }
+
+class Sql2oPersistenceModel implements Model {
+
+    private Sql2o sql2o;
+    //TODO: Add simple caching (List + isValid)
+
+    public Sql2oPersistenceModel(Sql2o sql2o) {
+        this.sql2o = sql2o;
+    }
+
+    @Override
+    public Box addBox(Box box) {
+        try (Connection conn = sql2o.open()) {
+            UUID boxId = UUID.randomUUID();
+            conn.createQuery("INSERT INTO boxes VALUES (:uuid, :receiver, :weight, :color, :country)")
+                    .addParameter("uuid", boxId)
+                    .addParameter("receiver", box.receiver)
+                    .addParameter("weight", box.weight)
+                    .addParameter("color", box.color)
+                    .addParameter("country", box.country)
+                    .executeUpdate();
+            return getBox(boxId);
+        }
+    }
+
+    private Box getBox(UUID boxId) {
+        try (Connection conn = sql2o.open()) {
+            List<Box> boxes = conn.createQuery("SELECT * FROM boxes WHERE id=:uuid")
+                    .addParameter("uuid", boxId)
+                    .executeAndFetch(Box.class);
+            return boxes.isEmpty() ? null : boxes.get(0);
+        }
+    }
+
+    @Override
+    public List<Box> getAllBoxes() {
+        try (Connection conn = sql2o.open()) {
+            List<Box> boxes = conn.createQuery("SELECT * FROM boxes")
+                    .executeAndFetch(Box.class);
+            return boxes;
+        }
+    }
+}
+
