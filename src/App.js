@@ -1,11 +1,12 @@
 import React from 'react';
 
 import './App.css';
-import AddBox from './AddBox';
-import DispatchTable from './DispatchTable';
+import AddBox from './components/AddBox';
+import DispatchTable from './components/DispatchTable';
+import { Switch, Route, Link } from 'react-router-dom';
 
 function App() {
-  async function addDispatch(box) {
+  async function addDispatch(box) { //TODO: Move to AddBox or to redux action
     try {
       const response = await fetch('http://localhost:4567/box', {
         method: 'POST',
@@ -23,8 +24,23 @@ function App() {
   }
   return (
     <div className="App">
-      <AddBox addDispatch={addDispatch}/>
-      <DispatchTable />
+      <nav>
+        <Link to="/">Home</Link> |
+        <Link to="/addbox"> Add box</Link> |
+        <Link to="/listboxes"> List dispatches</Link>
+      </nav>
+      <Switch>
+        <Route exact path="/">
+          <AddBox addDispatch={addDispatch} />
+          <DispatchTable />
+        </Route>
+        <Route exact path="/addbox">
+          <AddBox addDispatch={addDispatch} />
+        </Route>
+        <Route exact path="/listboxes">
+          <DispatchTable />
+        </Route>
+      </Switch>
     </div>
   );
 }

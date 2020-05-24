@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { dispatchesSelector, fetchDispatches } from './slices/dispatches';
+import { dispatchesSelector, fetchDispatches } from '../slices/dispatches';
 
 function DispatchTable() {
     const dispatch = useDispatch();

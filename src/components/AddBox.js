@@ -12,8 +12,8 @@ function AddBox({addDispatch}) {
     };
     const [box, setBox] = useState(initialState);
     function handleInput(event) {
-        const { name, value } = event.target; //name refers to form input field
-        setBox({ ...box, [name]: value });
+        const { name, value } = event.target;
+        setBox({ ...box, [name]: value }); //name matches form field
     }
     function handleSubmit(event){
         event.preventDefault(); //avoid URL change
