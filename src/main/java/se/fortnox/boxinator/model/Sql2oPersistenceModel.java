@@ -30,7 +30,7 @@ public class Sql2oPersistenceModel implements Model {
         }
     }
 
-    private Box getBox(UUID boxId) {
+    protected Box getBox(UUID boxId) {
         try (Connection conn = sql2o.open()) {
             List<Box> boxes = conn.createQuery("SELECT * FROM boxes WHERE id=:uuid")
                     .addParameter("uuid", boxId)

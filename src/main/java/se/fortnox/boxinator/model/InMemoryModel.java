@@ -2,6 +2,7 @@ package se.fortnox.boxinator.model;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 public class InMemoryModel implements Model {
 
@@ -9,6 +10,7 @@ public class InMemoryModel implements Model {
 
     @Override
     public Box addBox(Box box) {
+        box.id = UUID.randomUUID();
         boxes.add(box);
         return box;
     }
