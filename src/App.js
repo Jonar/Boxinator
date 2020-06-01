@@ -25,9 +25,9 @@ function App() {
   return (
     <div className="App">
       <nav>
-        <Link to="/">Home</Link> |
-        <Link to="/addbox"> Add box</Link> |
-        <Link to="/listboxes"> List dispatches</Link>
+        <Link to="/">Home</Link>{' | '}
+        <Link to="/addbox">Add box</Link>{' | '}
+        <Link to="/listboxes">List dispatches</Link>
       </nav>
       <Switch>
         <Route exact path="/">

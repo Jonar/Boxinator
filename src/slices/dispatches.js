@@ -1,8 +1,7 @@
 import { createSlice } from '@reduxjs/toolkit'
-import mockDispatches from '../mock'
 
 export const initialState = {
-    dispatchesList: mockDispatches,
+    dispatchesList: [],
 };
 
 const dispatchesSlice = createSlice({
@@ -29,7 +28,7 @@ export function fetchDispatches() {
         try {
             const response = await fetch('http://localhost:4567/dispatches');
             const data = await response.json();
-            
+
             dispatch(getDispatchesSuccess(data));
         } catch (error) {
             dispatch(getDispatchesFailure());
