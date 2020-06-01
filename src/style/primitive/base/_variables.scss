@@ -42,6 +42,7 @@ $bq-border: 16px solid #f0f0f0 !default;
 // Typography
 //==============================================================================
 
+
 // Body
 $font-size: 1rem !default;
 $body-font-size: 1rem !default;
@@ -49,14 +50,15 @@ $font-style: normal !default;
 $font-variant: normal !default;
 $font-weight: normal !default;
 $font-color: #404040 !default;
-$font-family: -apple-system, BlinkMacSystemFont, Helvetica Neue, Helvetica, Arial, sans-serif !default;
+$font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+sans-serif !default;
 $line-height: 1.6 !default;
 
 // Headings
 $heading-font-color: #404040 !default;
 $heading-font-weight: 600 !default;
-$heading-font-family: -apple-system, BlinkMacSystemFont, Helvetica Neue, Helvetica, Arial,
-  sans-serif !default;
+$heading-font-family: $font-family !default;
 $heading-line-height: 1.2 !default;
 
 $h1-mobile: 1.75rem !default;
@@ -98,7 +100,7 @@ $button-background: $primary-color !default;
 $button-background-hover: darken($button-background, 10%) !default;
 $button-color: #ffffff !default;
 $button-font-weight: 600 !default;
-$button-font-family: -apple-system, BlinkMacSystemFont, Helvetica Neue, Helvetica, Arial, sans-serif !default;
+$button-font-family: $font-family !default;
 $button-font-size: 1rem !default;
 $button-border-width: 1px !default;
 $button-border-style: solid !default;
@@ -127,7 +129,7 @@ $round-buttons: 40px !default;
 //==============================================================================
 
 $forms: (
-  '[type=color], [type=date], [type=datetime], [type=datetime-local], [type=email],        [type=month], [type=number], [type=password], [type=search], [type=tel], [type=text], [type=url], [type=week], [type=time], select, textarea'
+  '[type=color], [type=date], [type=datetime], [type=datetime-local], [type=email], [type=month], [type=number], [type=password], [type=search], [type=tel], [type=text], [type=url], [type=week], [type=time], select, textarea'
 ) !default;
 $buttons: ('.button, a.button, button, [type=submit], [type=reset], [type=button]') !default;
 $input-background: transparent !default;
@@ -149,6 +151,6 @@ $caption: #ababab !default;
 
 $code-color: $font-color !default;
 $code-size: 14px !default;
-$code-family: Menlo, monospace !default;
+$code-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New', monospace !default;
 $code-background: transparent !default;
 $code-borders: $borders !default;
