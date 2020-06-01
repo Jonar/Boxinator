@@ -1,6 +1,6 @@
 import React from 'react';
 
-import './App.css';
+import './App.scss';
 import AddBox from './components/AddBox';
 import DispatchTable from './components/DispatchTable';
 import { Switch, Route, Link } from 'react-router-dom';

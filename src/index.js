@@ -4,6 +4,7 @@ import {configureStore} from '@reduxjs/toolkit'
 import {Provider} from 'react-redux'
 
 import './index.css';
+import './style/primitive/main.scss';
 import App from './App';
 import * as serviceWorker from './serviceWorker';
 import rootReducer from './slices/root';
