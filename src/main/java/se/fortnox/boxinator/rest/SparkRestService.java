@@ -18,11 +18,13 @@ public class SparkRestService implements RestService {
 
     @Override
     public void start() {
-        enableCORS("http://localhost:3000", "GET, POST", "Accept, Content-Type");
+        String origin = System.getenv("ALLOW_ORIGIN");
+        if(origin == null) { origin = "*"; }
+        enableCORS(origin, "GET, POST", "Accept, Content-Type");
         Gson response = new Gson();
 
+        // Endpoints:
         post("/box", "application/json", new BoxController(model), response::toJson);
-
         get("/dispatches", "application/json", new DispatchesController(model), response::toJson);
     }
 

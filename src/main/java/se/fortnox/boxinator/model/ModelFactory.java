@@ -8,7 +8,9 @@ import java.util.UUID;
 
 public class ModelFactory {
     public static Model postgresPersistenceModel() {
-        Sql2o sql2o = new Sql2o("jdbc:postgresql://localhost:5432/boxinator",
+        String dbUrl = System.getenv("JDBC_DATABASE_URL");
+        if(dbUrl == null) { dbUrl = "jdbc:postgresql://localhost:5432/boxinator"; }
+        Sql2o sql2o = new Sql2o(dbUrl,
                 "postgres", "docker", new PostgresQuirks() {
             {
                 converters.put(UUID.class, new UUIDConverter());
