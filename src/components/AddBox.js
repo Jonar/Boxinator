@@ -7,25 +7,10 @@ const matchName = '(\\p{L}+ ?)+(?<! )$'; //Unicode letters. Allow space between 
 function AddBox({addDispatch}) {
     const initialState = {
         receiver: '',
-        weight: '', //number, initially empty
+        weight: '',
         color: '',
         country: 'Sweden'
     };
-    const initialColour = {
-          hex: '#333',
-          rgb: {
-            r: 51,
-            g: 51,
-            b: 51,
-            a: 1,
-          },
-          hsl: {
-            h: 0,
-            s: 0,
-            l: .20,
-            a: 1,
-          },
-        }
     const [colour, setColour] = useState();
     const handleColourChange = colour => {
         setColour(colour);
@@ -77,7 +62,7 @@ function AddBox({addDispatch}) {
             {/* TODO: refactor into weight component */}
             <label htmlFor="weight">Weight</label>
             <input type="number" name="weight" id="weight" required={true}
-                placeholder={'0 kg'} min={0} step={0.001}
+                placeholder={'0 kg'} min={0} max={100} step={0.001}
                 onInput={checkWeight}
                 onInvalid={(event) => {
                     const input = event.target;

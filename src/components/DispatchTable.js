@@ -4,7 +4,7 @@ import { dispatchesSelector, fetchDispatches } from '../slices/dispatches';
 
 function DispatchTable() {
     const dispatch = useDispatch();
-    const {dispatchesList} = useSelector(dispatchesSelector);
+    const {dispatchesList, totalWeight, totalCost} = useSelector(dispatchesSelector);
 
     useEffect(() => {
         dispatch(fetchDispatches())
@@ -43,6 +43,14 @@ function DispatchTable() {
             <tbody>
                 {renderDispatchesList()}
             </tbody>
+            <tfoot>
+                <tr>
+                    <th>Totals</th>
+                    <th>{totalWeight}</th>
+                    <th></th>
+                    <th>{totalCost}</th>
+                </tr>
+            </tfoot>
         </table>
     );
 }

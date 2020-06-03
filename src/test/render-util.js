@@ -2,7 +2,6 @@ import React from 'react'
 import { configureStore } from '@reduxjs/toolkit'
 import { render as rtlRender } from '@testing-library/react'
 import { Provider } from 'react-redux'
-//import { initialState as reducerInitialState, reducer } from './reducer'
 import rootReducer from '../slices/root';
 
 /**
