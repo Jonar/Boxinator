@@ -41,7 +41,7 @@ function AddBox() {
             },
             body: JSON.stringify(box),
           });
-          dispatch(fetchDispatches()); //read back dispatches, re-renders connected components if necessary
+          dispatch(fetchDispatches()); //read back dispatches, re-renders connected components as necessary
         } catch (error) {
           console.log(error);
         }
@@ -139,4 +139,5 @@ function ColourInput({colour, setColour, box, setBox}) {
             : null}
     </>
 }
+
 export default AddBox;

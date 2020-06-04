@@ -13,12 +13,15 @@ function DispatchTable() {
     function renderDispatchesList() {
         if(dispatchesList) {
             return (dispatchesList.length > 0
-                ? dispatchesList.map((box, index) => ( //TODO improvement: use uuid instead of index as key
+                ? dispatchesList.map((dispatch, index) => (
                     <tr key={index}>
-                        <td>{box.receiver}</td>
-                        <td>{box.weight}</td>
-                        <td style={{ backgroundColor: box.color }}></td>
-                        <td>{box.shippingCost}</td>
+                        <td data-testid={'receiver'+index}>
+                            {dispatch.receiver}</td>
+                        <td data-testid={'weight'+index}>
+                            {dispatch.weight}</td>
+                        <td style={{ backgroundColor: dispatch.color }} data-testid={'colour'+index}></td>
+                        <td data-testid={'shippingCost'+index}>
+                            {dispatch.shippingCost}</td>
                     </tr>
                 )) : (
                     <tr>
@@ -37,7 +40,7 @@ function DispatchTable() {
                 <tr>
                     <th>Receiver</th>
                     <th>Weight</th>
-                    <th>Box color</th>
+                    <th>Box colour</th>
                     <th>Shipping cost</th>
                 </tr>
             </thead>
@@ -47,9 +50,9 @@ function DispatchTable() {
             <tfoot>
                 <tr>
                     <th>Totals</th>
-                    <th>{totalWeight}</th>
+                    <th data-testid="totalWeight">{totalWeight}</th>
                     <th></th>
-                    <th>{totalCost}</th>
+                    <th data-testid="totalCost">{totalCost}</th>
                 </tr>
             </tfoot>
         </table>
