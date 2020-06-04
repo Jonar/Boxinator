@@ -9,7 +9,7 @@ import java.util.UUID;
 public class Sql2oPersistenceModel implements Model {
 
     private Sql2o sql2o;
-    //TODO: Add simple caching (List + isValid)
+    //TODO improvement: Add simple caching (List + isValid)
 
     public Sql2oPersistenceModel(Sql2o sql2o) {
         this.sql2o = sql2o;

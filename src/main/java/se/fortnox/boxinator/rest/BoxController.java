@@ -18,7 +18,7 @@ public class BoxController implements Route {
     @Override
     public Object handle(Request request, Response response) {
         Box box = convert.fromJson(request.body(), Box.class);
-        //TODO: validate box input
+        //TODO improvement: validate box input here
         model.addBox(box);
         return box;
     }

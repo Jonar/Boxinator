@@ -5,7 +5,7 @@ import java.math.BigDecimal;
 public class Dispatch { //DTO
     String receiver;
     double weight;
-    String color; //TODO: Color class. Use Color.decode("#FFCCEE") from Java AWT;
+    String color;
     BigDecimal shippingCost;
 
     Dispatch(String receiver, double weight, String color, double shippingCost) {
