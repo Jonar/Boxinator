@@ -84,6 +84,9 @@ Below are the things that didn't make it into this initial version. I hope to re
     - Store secrets (credentials, keys etc) in a secure way.
     - Validation and defensive coding in backend.
     - Restrict docker networking.
+* Future proofing
+    - Add versioning aspect to REST endpoints.
+    - Version database schema.
 * Fixups
     - Get rid of SLF4J warnings on backend startup by providing logger dependencies.
 
