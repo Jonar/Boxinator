@@ -21,6 +21,13 @@ Run the frontend tests by navigating to the boxinator-frontend subtree and execu
 For the boxinator-backend you execute the tests with `mvn clean test`. This requires that you have maven installed, as well as a compatible JDK. The target feature level of the app is Java 9. Please use a JDK for Java 9 or later.
 > Once again I can provide instructions for running the tests in docker if there's any problem. My Dockerfile uses maven:3.6.3-jdk-11-slim image for the build step.
 
+## Assumptions
+Some design decisions were based on these assumptions.
+* Max weight for a box is 100 kg (well above Postnords 20 kg limit) and lowest allowed weight is 1 gram.
+* Shipping price is limited to two decimals (no bitcoins ;) That means the lowest possible price is 0.01.
+* Receiver name in the database is no longer than 255 characters and can consist of any unicode letters, allowing Chinese characters for example. In the frontend name length is capped at 70 characters for aestetical reasons.
+* Finally the end user is running a modern up to date chromium based browser. I have not tested with other browsers but it might work...
+    - The browser needs to support (caniuse) /\p{L}+/u regex (unicode letters) for receiver name validation. Modern updated browsers support this.
 
 ## Clarifications
 How I've interpreted the requirements, as well as rationale for agreed upon deviations.
@@ -35,22 +42,15 @@ How I've interpreted the requirements, as well as rationale for agreed upon devi
 * Sass instead of Less.
     - See Journey section for rationale.
 * Primitive UI design framework
-    - Instead of writing loads of scss myself and reinventing the wheel on how to cater for different browsers; I decided to build upon a framework called [Primitive](https://taniarascia.github.io/primitive/).
-    - This mimics how many companies implement styling. Theme and most styling decisions are owned by a team of UX experts. Styling done by developers is limited in comparison and has a lot to do with disposition.
-    - I know enough Sass to explain most about everything that library does. Ask me questions in case you want to test my Sass/CSS abilities.
+    - I decided to build upon a framework called [Primitive](https://taniarascia.github.io/primitive/), instead of writing loads of scss myself; reinventing the wheel on how to cater to different browsers
+    - This mimics how many companies implement styling. Often theme and most styling decisions are owned by a team of UX experts. Styling done by developers is limited in comparison and deals mostly with layout, padding and similar.
+    - I know enough Sass to explain most about everything the Primitive library does. Ask me questions in case you want to test my Sass/CSS abilities.
 * Naming of resources: I've interpreted 'Dispatches' as being a higher lever concept than 'Box'. I.e. a dispatch might be something other than a box in the future. For example a letter or a postcard. A dispatch is such an entity in a state where it's ready to send.
     - With that in mind I chose to stick with the name 'dispatch' instead of 'boxes', 'boxList', 'boxTable' or similar. Later, when integrating Redux, I realized that might not have been the best choice of name... dispatch(dispatches) does not ring so well. Might change the name in the future.
-
-## Assumptions
-Some design decisions were based on these assumptions.
-* Max weight for a box is 100 kg (well above Postnords 20 kg limit) and lowest allowed weight is 1 gram.
-* Shipping price is limited to two decimals (no bitcoins ;) That means the lowest possible price is 0.01.
-* Receiver name is no longer than 255 characters and can consist of any unicode letters, allowing Chinese characters for example.
-* The end user is running a modern up to date chromium based browser. I have not tested with other browsers but it might work...
-    - The browser needs to support (caniuse) /\p{L}+/u regex (unicode letters) for receiver name validation. Modern updated browsers support this.
+* There are some TODO comments in the code that suggest future improvements. Normally I would not commit TODO comments; this is an exception to demonstrate my thoughts and ideas.
 
 # Future work
-A lot could be improved with my current solution, and should be before an app like this is ready to be deployed to production. However I had to draw a line somewhere to stop and hand this in.
+Several things can be improved in my current solution, and should be before an app like this is ready to be deployed to production. However I had to draw a line somewhere to stop and hand this in.
 
 Below are the things that didn't make it into this initial version. I hope to revisit and build more of that later to continue my learning journey.
 * The __No Blue__ bonus.
@@ -59,13 +59,13 @@ Below are the things that didn't make it into this initial version. I hope to re
     - Another possible solution might come from working in the HSL color space, defining a color range for blue Hues and blocking all shades of those.
     - I need to experiment to know what works and not. And discuss what blue is ;)
 * Backend validation
-    - This is a really important for data consistency and a must before deploying an app to production. I've only implemented frontend valdation in the form. That is great for improving UX but does little to guarantee data consistency. It is easily fooled by the technically inclined who can send raw requests to the server. There's a comment in the code detailing where I indend to implement this.
+    - This is a really important for data consistency and a must before deploying an app to production. I've only implemented frontend valdation in the form. That is great for improving UX but does little to guarantee data consistency. Easily circumvented by the technically inclined, who can send raw requests to the server. There's a comment in the backend code detailing where I indend to implement this.
 * Backend caching
     - Even though performance is not in scope for the task it would be nice with a simple caching mechanism towards the database. A list together with a bool variable for invalidation would go a long way. There's a comment in the code detailing where I indend to implement this.
 * Improved error handling
     - Backend could send better error messages when exceptions occur, for example due to database connection failure. Currenly a HTML formatted response with error 500 is sent. Not really REST.
-    - In frontend UX could be improved by giving better feedback on loading, success and failure of backend communication.
-* Calculate totalShipping in backend (or database view) to avoid floating point precision problems. Expose to frontend via dispatches REST endpoint.
+    - Frontend UX could be improved by giving better feedback on loading, success and failure of backend communication.
+* Switch to calculating totalShipping in backend (or database view) to avoid floating point precision problems. Expose to frontend via dispatches REST endpoint.
 * Expose box uuid to use as key in frontend
     - Currently array index is used as key in the Dispatches view. That is not recommended by React because it may impact rendering performance. My array is not changing index all the time so it's okay, but the proper solution would be to use the uuid from the backend instead.
 * More Unit tests
@@ -73,7 +73,7 @@ Below are the things that didn't make it into this initial version. I hope to re
     - Backend: Test controllers
 * Integration testing
     - Test REST service and composition/flow.
-    - Consider test database connection.
+    - Consider testing database connection.
 * E2E testing
     - A few scenarios testing via frontend UI, using real backend and database.
 * Slim frontend
@@ -83,21 +83,24 @@ Below are the things that didn't make it into this initial version. I hope to re
     - Secure communication between containers. HTTPS connection from frontend. [Let's Encrypt](https://letsencrypt.org/).
     - Store secrets (credentials, keys etc) in a secure way.
     - Validation and defensive coding in backend.
+    - Restrict docker networking.
 * Fixups
     - Get rid of SLF4J warnings on backend startup by providing logger dependencies.
 
 # Work breakdown and strategy
-### Implementation strategy
+## Implementation strategy
 I went with a top down implementation strategy.
 * Started with developing the frontend in isolation. State handled via React, and later Redux.
 * Developed Java backend and integrated with frontend. State stored in memory by the Java app.
 * Set up database and integrated backend towards it. State persisted in database.
-* Dockerized solution
+* Finally I Dockerized the solution.
 
-For the backend I wanted to avoid Java boilerplate code as much as possible.
+For the backend I wanted to avoid Java boilerplate code and cargo cult programming as much as possible.
 - For example I chose not to use interfaces for everything. Use where necessary. IntelliJ has really good tools for refactoring and extracting interfaces, so there is really no need to have them before they are needed.
+- The exception is naming some classes to fit the MVC pattern, in order to demonstrate my understanding.
 
-### Test strategy
+## Test strategy
+
 * Focus on unit testing model and logic.
 * Less focus on composition. That is the domain of integration testing, which is out of scope for this assignment.
 * Regarding test doubles
@@ -105,61 +108,64 @@ For the backend I wanted to avoid Java boilerplate code as much as possible.
     - Mocks are often not a necessity when focusing on testing model and logic.
     - Mocks are a sign of testing composition, which should be handled by integration tests.
 
-### Work breakdown
+## Work breakdown
 A document detailing my work breakdown structure can be provided on request, in case you're interested in seeing how I structured my work.
 
 # My Journey
 During this project I turned many stones and built an understanding of the React & Redux ecosystems. Both were new aquaintances but I ended up apreciating both of them. I would definitely choose React over Angular for future projects.
 
-I also implemented a REST server on my own for the first time ever. In most other projects I've been adding to the foundation others have already built, following the pattern and working with my team. This was a completely different journey; being on my own and facing lots of new decisions. Needed to find out how I myself wanted everything to be set up. When I learn something new I tend go for learning it deeply. It takes a lot longer to get a result, but in the long run it has been a winning strategy. I don't want to just do things and make them work. It is important for me to take informed choices and being able to motivate and explain how the solution works and why.
+This was my first time ever implementing a REST server on my own. In most other projects I've been adding to the foundation others have already built, following patterns and working with my team. This was a completely different journey; being on my own and facing lots of new decisions. Needed to find out how I myself wanted everything to be set up. When I learn something new I tend go for learning it deeply. It takes a lot longer to get a result, but in the long run it has been a winning strategy for me. I don't want to just do things and make them work. It is important for me to take informed choices; standing able to motivate and explain how the solution works and why.
+
+Initially I wanted to work in a test-first TDD/BDD fashion, but soon had to abandon that approach in favor of experimentation. A test-first strategy is a better fit for solutions where I have lots of prior design experience. Instead  I tried to use experimentation and simple means to implement basic behavior; with the aim of writing tests in conjunction with refactoring and introduction of more advanced technology.
 
 Below are some highlights from my journey. What I've learnt and what I've considered.
 - [Thinking in React](https://reactjs.org/docs/thinking-in-react.html) inspired my approach to designing and building the frontend.
+- [Tania Rascia](https://www.taniarascia.com/)'s material on both React and Redux has been an invaluable resource for entering the React ecosystem. She manages to find just the right balance and level of detail to aid in quickly grasping advanced concepts. Very impressive.
 - React Classes vs Functions and Hooks.
-    * I quickly grasped that there was a modernisation going on in the React Community, with Hooks being considered the future and classes being left behind as a legacy solution.
+    * I quickly spotted that there was a modernisation trend going on in the React Community, with Hooks being considered the future and classes being left behind as a legacy solution.
     * That made it worth the effort to use functions and hooks as much as possible. For both React and Redux integration.
 - I investigated using React Hooks and Context as alternative to Redux. Wanted to answer the question _Is Redux really necessary for developing this application?_
     * My verdict: It's doable with only React, and not that tricky once the core concepts are understood. However with all the bells and whistles of Redux toolkit (time travel debugging etc); Redux is clearly the better alternative, and worth the effort to learn.
 - Investigated differences between Sass and Less.
     * I know Sass/scss from my Angular development and wanted to know if Less had something to offer that Sass did not.
-    * My conclusion was that Sass is generally considered the better and more powerful alternative. It is somewhat more popular. That was enough reasons for me to select Sass over Less, after clearing that it was an okay deviation from the requirements.
+    * My conclusion was that Sass is generally considered the better and more powerful alternative. It is somewhat more popular. That was enough reason for me to select Sass over Less, after clearing that it was an okay deviation from the requirements.
 - Investigated using BackBone.js for routing and backend communication
     * Since it's part of the Fortnox tech stack I was interested to know how it could fit into my solution.
-    * That curiousity made me read through most of [BackBone's extensive getting started gudie](https://backbonejs.org/#Getting-started). It was an interesting read that gave me a grip of the concepts it offers.
+    * That curiousity made me read through most of [BackBone's extensive getting started gudie](https://backbonejs.org/#Getting-started). It was an interesting read that gave me a grip on the concepts it offers.
     * However in the end I decided to go with React-router, Redux and the native JS fetch api for BE-communication due to it's relative simplicity.
 - Investigated React and Redux form libraries
-    * Went with a native React implementation instead due to the less steep learning curve.  Of the libraries I checked https://react-hook-form.com/ stood out as being a nice and compact alternative.
+    * Went with a native React/HTML5 implementation instead. Less steep learning curve. Of the libraries I checked https://react-hook-form.com/ stood out as being the most nice and compact alternative.
 - Redux-Thunk vs Redux-Saga
     * Wanted to know the differences and similarities. I went with Redux-Thunk as included in Redux Tool Kit.
 - Javascript Fetch APIs
-    * Looked into Javascript fetch vs fetch-suspense vs axios. Went with native JS fetch for simplicity reasons.
+    * Looked into Javascript fetch vs fetch-suspense vs axios. Went with native JS fetch for simplicity reasons. Fewer dependencies.
 - React Testing Library as alternative to Enzyme
     * Decided to go with RTL instead of Enzyme after reading an eye opening [blog post about testing implementation details](https://kentcdodds.com/blog/testing-implementation-details) by Kent C. Dodds. He happens to be the author of RTL though, so maybe I'm missing something great that Enzyme has to offer ;)
 - Jest vs Mocha
     * Went with Jest. Path of least resistance. It was already set up for me with Create React App. I have used some Mocha before though, in other projects. I wanted to know the differences and make an informed choice.
 - Java Spring Boot vs more lightweight alternatives
-    * Initially I wanted to write the backend with as much plain Java as possible. I wanted a solution that I could grasp easily and maintain control over, with as little "magic" as possible. I also wanted to reduce the amount of boilerplate code that Java solutions are infamous for.
+    * My starting point was I wanting to write the backend with as much plain Java as possible. I wanted a solution that I could easily grasp and maintain control over, with as little "magic" as possible. I also wanted to reduce the amount of boilerplate code that Java solutions are infamous for.
     * Quite early on my journey I started looking at Spring Boot... Seemed to be the most popular solution by far. However there was *a lot* of magic to understand, with autowiring and all sorts of annotations sprinkled in the code. Not what I was looking for. Also I got the notion of Spring being rather heavy and resource intensive. What mostly spoke for Spring in this case was the clear MVC structure.
     * My journey led me on to [Spark](http://sparkjava.com/) for implementing my REST service. That felt lightweight enough!
     * Through the Spark documentation I also found [Sql2o](https://www.sql2o.org/). An ORM-free libary for accessing SQL databases, with similar goals as Spark in terms of code style and reducing boilerplate.
     * Those two libraries gave me most of what I needed to implement my backend and I went on my merry way...
     * Stopping only to consider RxJava for composition. However I decided my Java app was not complex enough to merit that dependency.
 - Java BigDecimal
-    * Switched from double to BigDecimal as soon as I spotted the first precision problem. Much better! Have not used BigDecimal a lot before so I read up on the API.
+    * Switched from double to BigDecimal as soon as I spotted the first precision problems. Much better! Have not used BigDecimal a lot before so I read up on the API.
 - CORS
     * I went deeper on how to properly set up CORS on the server. New the basics before but had not touched allowed Headers and Methods.
 - Investigated deploying to cloud service
-    * I wanted this for deploying the app as a backup option in case docker would be problematic for the reviewer.
-    * Checked Heroku, AWS, Azure and others. Looked for a free option. Heroku was the most promising but require running DB as add-on instead of Docker container. That has an impact on design.
+    * I wanted this knowledge as a Plan B option, in case running with docker become problematic for the reviewer.
+    * Checked Heroku, AWS, Azure and others. Looked for a free option. Heroku was the most promising but require running DB as add-on instead of Docker container. That has an impact on design. Okay trade-off though.
 - MySQL vs Postgres
     * I wanted to know the differences and make an informed choice. [This article](https://www.techrepublic.com/article/mysql-vs-postgresql/) presented a nice comparison.
-    * I understand the recommendation to use MySQL due to being a bit faster and less advanced; and that it's commonly used for web applications due to those aspects.
-    * However Postgres felt more interesting because of several reasons. Firstly it's what Fortnox already use, which made it more intersting to try out. Secondly I wanted the possibility to deploy my app to Heroku. Their free tier provide a Postgres database out of the box whereas MySQL would require using a less well documented add-on. Lastly the Docker image for MySQL came with warnings and disclaimers attached, related to running it on non-Linux platforms. With Postgres and Docker being familiar tools at Fortnox I felt more confident that a Postgres image would work for the reviewer.
+    * I understand the recommendation to use MySQL due to being a bit faster and less advanced; and that it's commonly used for web applications due to those reasons.
+    * However Postgres felt more interesting because of several things. Firstly it's what Fortnox already use, which made it more intersting to try out. Secondly I wanted the possibility to deploy my app to Heroku. Their free tier provide a Postgres database out of the box, whereas MySQL would require using a less well documented add-on. Lastly the Docker image for MySQL came with warnings and disclaimers attached, related to running it on non-Linux platforms. With Postgres and Docker being familiar tools at Fortnox I felt more confident that a Postgres image would work for the reviewer.
     * These factors made me go with Postgres, after consulting with Fortnox if that was an okay choice.
-- Backend testing libraries. Testing logic.
+- Backend testing libraries for testing logic.
     * I had a look at several interesting testing libraries but stayed with JUnit 4, together with AssertJ and JUnitParams, since the requirements was specifically unit testing.
     * I investigated newly released JUnit 5 and compared with the more familiar v4. v5 sure has nice features that I want to learn and use, but doing so was not feasable in the scope of this project. Also I was worried that other test depencencies that I wanted to use might not work with v5. Found a [nice tutorial](https://www.vogella.com/tutorials/JUnit/article.html#usingjuni4https://www.vogella.com/tutorials/JUnit/article.html) showing off both versions.
-    * I looked into JBehave as a possible fit for the tests. I'm a fan of the Cucumber Gherkin syntax and bringing that to java in an easy way was tempting. Still out of scope though.
+    * I looked into __JBehave__ as a possible fit for the tests. I'm a fan of the __Cucumber__ Gherkin syntax and bringing that to java in an easy way was tempting. Still out of scope though.
 - Integration and REST testing. Testing composition.
     * Even though integration testing was out of scope I was interested in finding a nice framework for testing my Spark REST servcie. That was a deeper rabbit hole than I thought. I want to avoid deploying a bulky web server for my testing needs. I looked into Rest-Assured, Jersey Test, Karate Mock Servlet and others.
     * Eventually I made the connection that most of my hits was about testing REST clients and mocking the server. Not testing the real REST service as I wanted. After making that distinction it became easier. All I need is a decent REST client to use in my tests. Apache HttpClient seems promising.
