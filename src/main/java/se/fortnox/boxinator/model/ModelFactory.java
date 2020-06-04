@@ -8,10 +8,15 @@ import java.util.UUID;
 
 public class ModelFactory {
     public static Model postgresPersistenceModel() {
+        // Default are for devenv. Env values will be used in production.
         String dbUrl = System.getenv("JDBC_DATABASE_URL");
         if(dbUrl == null) { dbUrl = "jdbc:postgresql://localhost:5432/boxinator"; }
-        Sql2o sql2o = new Sql2o(dbUrl,
-                "postgres", "docker", new PostgresQuirks() {
+        String user = System.getenv("POSTGRES_USER");
+        if(user == null) { user = "postmaster"; }
+        String password = System.getenv("POSTGRES_PASSWORD");
+        if(password == null) { password = "docker"; }
+
+        Sql2o sql2o = new Sql2o(dbUrl, user, password, new PostgresQuirks() {
             {
                 converters.put(UUID.class, new UUIDConverter());
             }

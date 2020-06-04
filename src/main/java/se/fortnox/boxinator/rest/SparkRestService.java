@@ -11,6 +11,7 @@ import static spark.Spark.*;
  */
 public class SparkRestService implements RestService {
     private Model model;
+    private Gson responseConverter = new Gson();
 
     public SparkRestService(Model model) {
         this.model = model;
@@ -18,21 +19,23 @@ public class SparkRestService implements RestService {
 
     @Override
     public void start() {
-        String origin = System.getenv("ALLOW_ORIGIN");
-        if(origin == null) { origin = "*"; }
-        enableCORS(origin, "GET, POST", "Accept, Content-Type");
-        Gson response = new Gson();
-
-        // Endpoints:
-        post("/box", "application/json", new BoxController(model), response::toJson);
-        get("/dispatches", "application/json", new DispatchesController(model), response::toJson);
+        enableCORS();
+        // Expose endpoints
+        post("/box", "application/json", new BoxController(model), responseConverter::toJson);
+        get("/dispatches", "application/json", new DispatchesController(model), responseConverter::toJson);
     }
 
     /**
      * Enables CORS for requests.
      * This initialization method should be called once.
      */
-    private void enableCORS(final String origin, final String methods, final String headers) {
+    private void enableCORS() {
+        String origin = System.getenv("ALLOW_ORIGIN");
+        if(origin == null) { origin = "*"; }
+
+        final String allowedOrigin = origin;
+        final String allowedMethods = "GET, POST";
+        final String allowedHeaders  ="Accept, Content-Type";
 
         options("/*", (request, response) -> {
 
@@ -50,9 +53,9 @@ public class SparkRestService implements RestService {
         });
 
         before((request, response) -> {
-            response.header("Access-Control-Allow-Origin", origin);
-            response.header("Access-Control-Request-Method", methods);
-            response.header("Access-Control-Allow-Headers", headers);
+            response.header("Access-Control-Allow-Origin", allowedOrigin);
+            response.header("Access-Control-Request-Method", allowedMethods);
+            response.header("Access-Control-Allow-Headers", allowedHeaders);
 
             response.type("application/json");
         });
