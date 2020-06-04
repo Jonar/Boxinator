@@ -1,0 +1,43 @@
+version: '3.8'
+
+services:
+
+  db:
+    build: ./boxinator-db/
+    restart: unless-stopped
+    ports:
+      - "5432:5432"
+    networks:
+      - persistence
+    volumes:
+        - "boxinator-db:/var/lib/postgresql/data"
+    env_file:
+        - ./boxinator-db/dev.env
+
+  backend:
+    build: ./boxinator-backend/
+    depends_on:
+      - db
+    ports:
+      - "4567:4567"
+    networks:
+      - persistence
+    environment:
+      - JDBC_DATABASE_URL=jdbc:postgresql://db:5432/boxinator
+      - ALLOW_ORIGIN=http://localhost:8080
+    env_file:
+      - ./boxinator-db/dev.env
+
+  frontend:
+    build: ./boxinator-frontend/
+    depends_on:
+      - backend
+    ports:
+      - 8080:80
+
+volumes:
+  boxinator-db:
+
+networks: #in addition to the default app wide network
+  persistence: #promotes isolation
+
