@@ -13,7 +13,7 @@ function DispatchTable() {
     function renderDispatchesList() {
         if(dispatchesList) {
             return (dispatchesList.length > 0
-                ? dispatchesList.map((box, index) => ( //TODO: don't use index as key
+                ? dispatchesList.map((box, index) => ( //TODO improvement: use uuid instead of index as key
                     <tr key={index}>
                         <td>{box.receiver}</td>
                         <td>{box.weight}</td>
@@ -30,7 +30,8 @@ function DispatchTable() {
         }
     }
 
-    return (
+    return (<>
+        <h2>Dispatches</h2>
         <table>
             <thead>
                 <tr>
@@ -52,7 +53,7 @@ function DispatchTable() {
                 </tr>
             </tfoot>
         </table>
-    );
+    </>);
 }
 
 export default DispatchTable;

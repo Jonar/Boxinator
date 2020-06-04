@@ -1,23 +1,25 @@
 import React, { useState } from 'react';
 import { ChromePicker } from 'react-color'
+import { fetchDispatches } from '../slices/dispatches';
+import { useDispatch } from 'react-redux';
 
 const matchName = '(\\p{L}+ ?)+(?<! )$'; //Unicode letters. Allow space between words but not at the end.
-    //TODO: consider using trim on input instead of lookahead regex to handle trailing space
+    //Consider using trim on input instead of lookahead regex to handle trailing space
 
-function AddBox({addDispatch}) {
+function AddBox() {
     const initialState = {
         receiver: '',
         weight: '',
         color: '',
         country: 'Sweden'
     };
+
     const [colour, setColour] = useState();
     const handleColourChange = colour => {
         setColour(colour);
         setBox({...box, color: colour.hex});
     }
     const rgbText = () => colour ? `${colour.rgb.r}, ${colour.rgb.g}, ${colour.rgb.b}`: "";
-
     const [displayColorPicker, setDisplayColorPicker] = useState(false);
     const toggleColorPicker = () => setDisplayColorPicker(!displayColorPicker);
     const closeColorPicker = () => setDisplayColorPicker(false);
@@ -25,7 +27,7 @@ function AddBox({addDispatch}) {
         position: 'absolute',
         zIndex: '2',
     }
-    const cover = { //TODO: Investigate
+    const cover = {
         position: 'fixed',
         top: '0px',
         right: '0px',
@@ -33,6 +35,7 @@ function AddBox({addDispatch}) {
         left: '0px',
     }
 
+    const dispatch = useDispatch();
     const [box, setBox] = useState(initialState);
     function handleInput(event) {
         const { name, value } = event.target;
@@ -44,6 +47,22 @@ function AddBox({addDispatch}) {
         setBox(initialState); //TODO: refactor into reset function
         setColour('');
     }
+    async function addDispatch(box) {
+        try {
+          await fetch('http://localhost:4567/box', {
+            method: 'POST',
+            headers: {
+              'Accept': 'application/json',
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(box),
+          });
+          //const data = await response.json(); //in case we want to use or log the response
+          dispatch(fetchDispatches()); //read back dispatches, re-renders connected components if necessary
+        } catch (error) {
+          console.log(error);
+        }
+    }
     function checkWeight(event){
         const input = event.target;
         if(input.valueAsNumber < 0) {
@@ -52,11 +71,13 @@ function AddBox({addDispatch}) {
             input.setCustomValidity(''); //value is fine - clear error message
         }
     }
-    return (
+    return (<>
+        <h2>Add box</h2>
         <form onSubmit={handleSubmit}>
             <label htmlFor="receiver">Name</label>
             <input type="text" id="receiver" name="receiver" required={true}
-                placeholder={'Receiver'} pattern={matchName} title={'Full name. Space can be used between names'}
+                placeholder={'Receiver'} pattern={matchName} maxLength={255}
+                title={'Full name. Space can be used between names'}
                 value={box.receiver} onChange={handleInput}/>
 
             {/* TODO: refactor into weight component */}
@@ -89,7 +110,6 @@ function AddBox({addDispatch}) {
                 </div>
                 : null}
 
-
             <label htmlFor="country">Country</label>
             <select name="country" id="country" required={true}
                 value={box.country} onChange={handleInput}>
@@ -101,9 +121,8 @@ function AddBox({addDispatch}) {
 
             <input type="submit" value="Save"/>
         </form>
+        </>
     );
 }
-
-
 
 export default AddBox;

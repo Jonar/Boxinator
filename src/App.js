@@ -6,22 +6,6 @@ import DispatchTable from './components/DispatchTable';
 import { Switch, Route, Link } from 'react-router-dom';
 
 function App() {
-  async function addDispatch(box) { //TODO: Move to AddBox or to redux action
-    try {
-      const response = await fetch('http://localhost:4567/box', {
-        method: 'POST',
-        headers: {
-          'Accept': 'application/json',
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(box),
-      });
-      const data = await response.json();
-      console.log('POST /box response:', data);
-    } catch (error) {
-      console.log(error);
-    }
-  }
   return (
     <div className="App">
       <nav>
@@ -31,11 +15,11 @@ function App() {
       </nav>
       <Switch>
         <Route exact path="/">
-          <AddBox addDispatch={addDispatch} />
+          <AddBox />
           <DispatchTable />
         </Route>
         <Route exact path="/addbox">
-          <AddBox addDispatch={addDispatch} />
+          <AddBox />
         </Route>
         <Route exact path="/listboxes">
           <DispatchTable />

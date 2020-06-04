@@ -12,8 +12,8 @@ const dispatchesSlice = createSlice({
     reducers: {
         getDispatchesSuccess: (state, {payload}) => {
             state.dispatchesList = payload;
-            state.totalWeight = payload.map((box)=>box.weight).reduce((total, curr) => total + curr);
-            state.totalCost = payload.map((box)=>box.shippingCost).reduce((total, curr) => total + curr);
+            state.totalWeight = payload.map((box)=>box.weight).reduce((total, curr) => total + curr, 0);
+            state.totalCost = payload.map((box)=>box.shippingCost).reduce((total, curr) => total + curr, 0);
         },
         getDispatchesFailure: state => {
             state.dispatchesList = [];
