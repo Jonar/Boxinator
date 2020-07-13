@@ -1,5 +1,5 @@
 import React from 'react';
-import { render } from './render-util';
+import { render } from './test-util';
 import App from '../App';
 import { MemoryRouter } from 'react-router-dom';
 

@@ -6,7 +6,7 @@ Run the command `docker-compose up` in the repository root.
 
 My docker setup uses multi-stage build. Running the command will build the entire solution from source, pulling down necessary dependencies and deploying the containers. Please give it some time to finish.
 
-Once you see the `Attaching to boxinator-db, boxinator_backend_1, boxinator_frontend_1` in the log wait a few seconds more for log output from the containers. Then the application is ready. Try it out by visiting http://localhost:8080/ in a modern browser. Preferably chromium-based.
+Once you see the `Attaching to boxinator_db_1, boxinator_backend_1, boxinator_frontend_1` in the log wait a few seconds more for log output from the containers. Then the application is ready. Try it out by visiting http://localhost:8080/ in a modern browser. Preferably chromium-based.
 
 > I'm running Linux (Ubuntu 18.04.4) and have not been able to test the solution on other platforms. I'm hopeful but not positive that Docker will solve it anyway on other platforms, but please reach out if you have trouble. Depends on what the base images support. Maybe we can find alternatives.
 >

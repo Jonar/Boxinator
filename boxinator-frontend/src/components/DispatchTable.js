@@ -21,7 +21,7 @@ function DispatchTable() {
                             {dispatch.weight}</td>
                         <td style={{ backgroundColor: dispatch.color }} data-testid={'colour'+index}></td>
                         <td data-testid={'shippingCost'+index}>
-                            {dispatch.shippingCost}</td>
+                            {dispatch.shippingCost.toFixed(2)}</td>
                     </tr>
                 )) : (
                     <tr>
@@ -52,7 +52,7 @@ function DispatchTable() {
                     <th>Totals</th>
                     <th data-testid="totalWeight">{totalWeight}</th>
                     <th></th>
-                    <th data-testid="totalCost">{totalCost}</th>
+                    <th data-testid="totalCost">{totalCost.toFixed(2)}</th>
                 </tr>
             </tfoot>
         </table>

@@ -1,6 +1,6 @@
 import React from 'react';
 import each from 'jest-each';
-import { render, fireEvent, act } from './render-util';
+import { render, fireEvent, act } from './test-util';
 import AddBox from '../components/AddBox';
 
 describe('Fill fields', () => {
